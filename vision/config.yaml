@@ -1,0 +1,20 @@
+%YAML:1.0
+---
+color:
+    hue_tol: 5
+    sat_tol: 75
+    rectMinArea: 200.0
+    circleMinArea: 5.0
+    ballMinArea: 15.0
+    roiWidth: 50
+    roiHeight: 50
+
+camera:
+    id: 0
+    width: 1280
+    height: 720
+    fps: 30
+
+window:
+    name: window
+    delay: 34
