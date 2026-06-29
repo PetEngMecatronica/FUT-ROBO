@@ -8,20 +8,23 @@
 #include "futbot/Video.hpp"
 #include "futbot/Calibration.hpp"
 #include "futbot/Team.hpp"
-// #include "futbot/Publisher.hpp"
+#include "futbot/Publisher.hpp"
 #include "futbot/Ball.hpp"
+#include "common/protocol.h"
 
 constexpr double RAD2DEG = 180 / M_PI;
 constexpr std::string CONFIG_FILE = "config.yaml";
 
+constexpr char MULTICAST_GROUP[] = "224.1.1.1";
+constexpr int PORT = 5007;
+
 static inline float getTheta(const cv::Point2f pt1, const cv::Point2f pt2)
 {
-    return std::atan2(pt1.y - pt2.y, pt1.x - pt2.x) * RAD2DEG;
+    return std::atan2(pt1.y - pt2.y, pt1.x - pt2.x);// * RAD2DEG;
 }
 
 int main()
 {
-    // Publisher publisher("MANAGER", "tcp://localhost:1883");
     Video video(CONFIG_FILE);
     Color orange("laranja", CONFIG_FILE), green("verde", CONFIG_FILE),
         blue("azul", CONFIG_FILE), pink("rosa", CONFIG_FILE),
@@ -32,6 +35,12 @@ int main()
         Team{'H', green, pink, yellow, CONFIG_FILE},
         Team{'A', blue, pink, yellow, CONFIG_FILE}
     };
+
+    Publisher publisher(MULTICAST_GROUP, PORT);
+    FieldPoses field{};
+
+    auto buffer = reinterpret_cast<const uint8_t*>(&field);
+    size_t bufsize = sizeof(FieldPoses);
 
     try {
         int key;
@@ -58,23 +67,38 @@ int main()
                 // publisher.publish(ballMsg, "BALL");
                 video.drawCircle(ballCentroid, ballRadius, Color::CYAN);
                 video.putText(ballMsg, ballCentroid);
+
+                field.ball.x = ballRealCentroid.x;
+                field.ball.y = ballRealCentroid.y;
             } else {
                 std::println("Ball wasn't found!");
             }
 
             // Find the four robots; there's two teams, and each team has two robots
-            for (auto& team : teams) {
+            for (int i = 0; i < 2; i++) {
+                Team& team = teams[i];
+            // for (auto& team : teams) {
                 team.findPoses(video);
-                for (const auto& player : team.players()) {
+
+                for (int j = 0; j < 2; j++) {
+                    const Team::Player& player = team.players()[j];
+                // for (const auto& player : team.players()) {
                     cv::Point2f playerRealRectCentroid = calib.uvToXy(player.centroidRect);
                     cv::Point2f playerRealCircleCentroid = calib.uvToXy(player.centroidCircle);
                     float playerAngle = getTheta(playerRealCircleCentroid, playerRealRectCentroid);
-                    std::string playerMsg = std::format("{:.0f},{:.0f},{:.0f}",
+                    std::string playerMsg = std::format("{:.0f},{:.0f},{:.2f}",
                         playerRealRectCentroid.x, playerRealRectCentroid.y, playerAngle);
-                    // publisher.publish(playerMsg, player.mqttTopic);
                     video.putText(playerMsg, player.centroidRect);
+
+                    uint8_t robot_id = i + (j << 1);
+                    field.robots[robot_id].id = robot_id;
+                    field.robots[robot_id].position.x = playerRealRectCentroid.x;
+                    field.robots[robot_id].position.y = playerRealRectCentroid.y;
+                    field.robots[robot_id].angle = playerAngle;
                 }
             }
+
+            publisher.send(buffer, bufsize);
 
             key = video.showFrame();
         } while (key != 27);
