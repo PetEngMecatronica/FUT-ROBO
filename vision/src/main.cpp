@@ -12,7 +12,7 @@
 #include "futbot/Ball.hpp"
 #include "common/protocol.h"
 
-constexpr double RAD2DEG = 180 / M_PI;
+constexpr float RAD2DEG = 180.0f / M_PIf;
 constexpr std::string CONFIG_FILE = "config.yaml";
 
 constexpr char MULTICAST_GROUP[] = "224.1.1.1";
@@ -20,7 +20,7 @@ constexpr int PORT = 5007;
 
 static inline float getTheta(const cv::Point2f pt1, const cv::Point2f pt2)
 {
-    return std::atan2(pt1.y - pt2.y, pt1.x - pt2.x);// * RAD2DEG;
+    return std::atan2(pt1.y - pt2.y, pt1.x - pt2.x);
 }
 
 int main()
@@ -86,8 +86,8 @@ int main()
                     cv::Point2f playerRealRectCentroid = calib.uvToXy(player.centroidRect);
                     cv::Point2f playerRealCircleCentroid = calib.uvToXy(player.centroidCircle);
                     float playerAngle = getTheta(playerRealCircleCentroid, playerRealRectCentroid);
-                    std::string playerMsg = std::format("{:.0f},{:.0f},{:.2f}",
-                        playerRealRectCentroid.x, playerRealRectCentroid.y, playerAngle);
+                    std::string playerMsg = std::format("{:.0f},{:.0f},{:.0f}",
+                        playerRealRectCentroid.x, playerRealRectCentroid.y, playerAngle * RAD2DEG);
                     video.putText(playerMsg, player.centroidRect);
 
                     uint8_t robot_id = i + (j << 1);
