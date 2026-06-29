@@ -56,10 +56,8 @@ int main()
                     ballRealCentroid.x, ballRealCentroid.y);
                 // std::println("ball radius: {}", ballRadius); // rascunho
                 // publisher.publish(ballMsg, "BALL");
-#ifdef MY_DEBUG
                 video.drawCircle(ballCentroid, ballRadius, Color::CYAN);
                 video.putText(ballMsg, ballCentroid);
-#endif // MY_DEBUG
             } else {
                 std::println("Ball wasn't found!");
             }
@@ -74,9 +72,7 @@ int main()
                     std::string playerMsg = std::format("{:.0f},{:.0f},{:.0f}",
                         playerRealRectCentroid.x, playerRealRectCentroid.y, playerAngle);
                     // publisher.publish(playerMsg, player.mqttTopic);
-#ifdef MY_DEBUG
                     video.putText(playerMsg, player.centroidRect);
-#endif // MY_DEBUG
                 }
             }
 

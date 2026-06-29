@@ -106,12 +106,10 @@ const std::array<Team::Player, 2>& Team::findPoses(Video& video)
             player.centroidCircle.y = circleCentroidRoi.y + m_roiRect.y;
             player.centroidRect = contourRect.center;
 
-#ifdef MY_DEBUG
             video.drawCircle(player.centroidCircle, player.radiusCircle, Color::PINK);
             video.drawCircle(player.centroidRect, 3, Color::YELLOW);
             video.drawRect(m_roiRect, Color::BLUE);
             video.drawPolyline(rotatedRectPts, true, Color::GREEN);
-#endif // MY_DEBUG
 
             player.found = true;
             // std::println("Found player: {}|{}", m_teamColor.name(), player.color.name()); // rascunho

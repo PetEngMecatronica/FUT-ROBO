@@ -66,14 +66,12 @@ void Video::updateFrame()
     // Get the frame from video capture
     m_cap >> m_frame;
 
-#ifdef MY_DEBUG
     if (m_frame.empty()) {
         // Rewind video if `cameraId` was a path to a video file
         std::println("Rewinding video...");
         m_cap.set(cv::CAP_PROP_POS_FRAMES, 0);
         m_cap >> m_frame;
     }
-#endif
 
     // Create a copy of the frame in HSV color space
     cv::cvtColor(m_frame, m_frameHsv, cv::COLOR_BGR2HSV);
