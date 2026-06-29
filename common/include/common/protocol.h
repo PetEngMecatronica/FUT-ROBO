@@ -22,9 +22,9 @@ struct FieldPoses {
     struct RobotPose robots[4];
 };
 
-struct Velocity {
-    float lwheel;
-    float rwheel;
+struct TwistCmd {
+    float v; // m/s
+    float w; // rad/s
 };
 
 #pragma pack(pop) // Restore default compiler alignment settings
